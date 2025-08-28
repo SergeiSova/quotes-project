@@ -23,8 +23,8 @@ pip install -r requirements.txt
 Создайте `.env` или экспортируйте переменные:
 
 - `DJANGO_SECRET_KEY=...`
-- `DJANGO_ALLOWED_HOSTS=127.0.0.1,localhost` (в проде: ваш домен)
-- `DJANGO_DEBUG=True` (в проде — False)
+- `DJANGO_ALLOWED_HOSTS=127.0.0.1,localhost` 
+- `DJANGO_DEBUG=True`
 - Для продакшена обязательно:
   - `CSRF_TRUSTED_ORIGINS=https://your-domain.tld`  ← схема обязательна.  
     Подробнее в доке: https://docs.djangoproject.com/en/stable/ref/settings/#csrf-trusted-origins
@@ -49,3 +49,4 @@ python manage.py runserver
 ALLOWED_HOSTS = ["your-domain.tld"]
 CSRF_TRUSTED_ORIGINS = ["https://your-domain.tld"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
