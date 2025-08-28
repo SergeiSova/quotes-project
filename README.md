@@ -1,12 +1,51 @@
 # Random Quotes (Django)
+
+Страница со случайной цитатой (весовая выдача), лайки/дизлайки, добавление из формы, ТОП.
+
+## Требования
+- Python 3.10+
+- Django 5.x
+
 ## Установка
-python -m venv .venv && .\.venv\Scripts\activate
+
+### Windows (PowerShell)
+python -m venv .venv
+.venv\Scripts\Activate
 pip install -r requirements.txt
-## Настройки
-set DJANGO_SECRET_KEY=... & set DJANGO_ALLOWED_HOSTS=127.0.0.1,localhost
-## Миграции и старт
+
+### macOS/Linux
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+
+## Настройки окружения
+
+Создайте `.env` или экспортируйте переменные:
+
+- `DJANGO_SECRET_KEY=...`
+- `DJANGO_ALLOWED_HOSTS=127.0.0.1,localhost` (в проде: ваш домен)
+- `DJANGO_DEBUG=True` (в проде — False)
+- Для продакшена обязательно:
+  - `CSRF_TRUSTED_ORIGINS=https://your-domain.tld`  ← схема обязательна.  
+    Подробнее в доке: https://docs.djangoproject.com/en/stable/ref/settings/#csrf-trusted-origins
+
+## Локальная разработка
+
 python manage.py migrate
+python manage.py createsuperuser
 python manage.py runserver
-## API
-GET /api/quote/random/
-POST /api/quote/<id>/vote/ {"value":"like"|"dislike"}
+
+Откройте:
+- `http://127.0.0.1:8000/` — главная (случайная цитата по весу)
+- `http://127.0.0.1:8000/add/` — добавить цитату
+- `http://127.0.0.1:8000/top/` — топ-подборки
+- `http://127.0.0.1:8000/admin/` — админка
+
+## Деплой (в т.ч. PythonAnywhere)
+
+1) В `settings.py` пропишите:
+
+```python
+ALLOWED_HOSTS = ["your-domain.tld"]
+CSRF_TRUSTED_ORIGINS = ["https://your-domain.tld"]
+STATIC_ROOT = BASE_DIR / "staticfiles"
