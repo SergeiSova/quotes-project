@@ -1,0 +1,23 @@
+{% extends 'quotes/base.html' %}
+{% block title %}Добавить цитату{% endblock %}
+{% block content %}
+  <div class="card">
+    <h2 style="margin-top:0">Добавление цитаты</h2>
+    <form method="post" class="form">
+      {% csrf_token %}
+      <div style="display:grid;gap:12px">
+        <label>Текст цитаты<br>{{ form.text }}</label>
+        <label>Источник<br>{{ form.source_name }}</label>
+        <label>Тип источника<br>{{ form.source_type }}</label>
+        <label>Вес<br>{{ form.weight }}</label>
+      </div>
+      <div style="margin-top:12px" class="row">
+        <button class="btn" type="submit">Сохранить</button>
+        <div class="muted">Не более трёх цитат на один источник, дубликаты не допускаются.</div>
+      </div>
+      {% if form.non_field_errors %}
+        <p style="color:#fca5a5">{{ form.non_field_errors }}</p>
+      {% endif %}
+    </form>
+  </div>
+{% endblock %}

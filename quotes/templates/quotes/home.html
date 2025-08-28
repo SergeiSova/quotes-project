@@ -1,0 +1,19 @@
+{% extends 'quotes/base.html' %}
+{% block title %}Случайная цитата{% endblock %}
+{% block pageviews %}{{ page_views }}{% endblock %}
+{% block content %}
+  <div class="card">
+    {% if quote %}
+      <div style="font-size:22px;line-height:1.5;margin-bottom:12px">«{{ quote.text }}»</div>
+      <div class="muted" style="margin-bottom:16px">— {{ quote.source.name }} ({{ quote.source.get_type_display }})</div>
+      <div class="row" style="gap:8px">
+        <button class="btn" data-action="like" data-id="{{ quote.id }}">👍 Лайк <span class="count-like">{{ quote.likes }}</span></button>
+        <button class="btn" data-action="dislike" data-id="{{ quote.id }}">👎 Дизлайк <span class="count-dislike">{{ quote.dislikes }}</span></button>
+        <div class="grow"></div>
+        <div class="muted">Показов цитаты: {{ quote.views }}</div>
+      </div>
+    {% else %}
+      <div>Пока нет ни одной цитаты. <a href="{% url 'quotes:add_quote' %}">Добавьте первую</a>!</div>
+    {% endif %}
+  </div>
+{% endblock %}

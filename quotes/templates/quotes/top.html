@@ -1,0 +1,80 @@
+{% extends 'quotes/base.html' %}
+{% block title %}ТОП цитат{% endblock %}
+{% block content %}
+  <div class="card" style="margin-bottom:16px">
+    <form method="get" class="row" style="gap:8px">
+      <label>Тип:
+        <select name="type" class="btn">
+          <option value="">— любой —</option>
+          <option value="movie" {% if filter_type == 'movie' %}selected{% endif %}>Фильм</option>
+          <option value="book" {% if filter_type == 'book' %}selected{% endif %}>Книга</option>
+          <option value="other" {% if filter_type == 'other' %}selected{% endif %}>Другое</option>
+        </select>
+      </label>
+      <label>Источник:
+        <input type="text" name="source" value="{{ filter_source }}" class="btn" placeholder="например, The Matrix" />
+      </label>
+      <button class="btn" type="submit">Фильтр</button>
+      <a class="btn" href="{% url 'quotes:top_quotes' %}">Сброс</a>
+    </form>
+  </div>
+
+  <div class="card" style="margin-bottom:16px">
+    <h2 style="margin:0 0 12px 0">ТОП‑10 по лайкам</h2>
+    <ol>
+      {% for q in top10 %}
+        <li style="margin-bottom:8px">
+          «{{ q.text }}» — <span class="muted">{{ q.source.name }}</span>
+          <span class="muted">(👍 {{ q.likes }} · 👎 {{ q.dislikes }} · 👁️ {{ q.views }})</span>
+        </li>
+      {% empty %}
+        <li>Нет данных.</li>
+      {% endfor %}
+    </ol>
+  </div>
+
+  <div class="card" style="margin-bottom:16px">
+    <h3 style="margin:0 0 12px 0">ТОП‑10 по Wilson score</h3>
+    <ol>
+      {% for q in top_wilson %}
+        <li>«{{ q.text }}» — <span class="muted">{{ q.source.name }}</span>
+          <span class="muted">(score: {{ q.wilson|floatformat:3 }} · 👍 {{ q.likes }} · 👎 {{ q.dislikes }})</span>
+        </li>
+      {% empty %}
+        <li>Нет данных.</li>
+      {% endfor %}
+    </ol>
+  </div>
+
+  <div class="card" style="margin-bottom:16px">
+    <h3 style="margin:0 0 12px 0">Самые просматриваемые</h3>
+    <ol>
+      {% for q in most_viewed %}
+        <li>«{{ q.text }}» — <span class="muted">{{ q.source.name }}</span>
+          <span class="muted">(👁️ {{ q.views }} · 👍 {{ q.likes }})</span></li>
+      {% empty %}
+        <li>Нет данных.</li>
+      {% endfor %}
+    </ol>
+  </div>
+
+  <div class="card">
+    <h3 style="margin:0 0 12px 0">Сводка по источникам</h3>
+    <table>
+      <thead>
+        <tr><th>Источник</th><th>Цитат</th><th>Лайков</th><th>Дизлайков</th><th>Просмотров</th></tr>
+      </thead>
+      <tbody>
+      {% for row in by_sources %}
+        <tr>
+          <td>{{ row.source__name }}</td>
+          <td>{{ row.cnt }}</td>
+          <td>{{ row.total_likes|default:0 }}</td>
+          <td>{{ row.total_dislikes|default:0 }}</td>
+          <td>{{ row.total_views|default:0 }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}
