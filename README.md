@@ -20,16 +20,21 @@ pip install -r requirements.txt
 
 ## Настройки окружения
 
-Создайте `.env` или экспортируйте переменные:
+Приложение читает настройки из переменных окружения. Файл `.env` автоматически не загружается.
 
-- `DJANGO_SECRET_KEY=...`
-- `DJANGO_ALLOWED_HOSTS=127.0.0.1,localhost` 
-- `DJANGO_DEBUG=True`
-- Для продакшена обязательно:
-  - `CSRF_TRUSTED_ORIGINS=https://your-domain.tld`  ← схема обязательна.  
-    Подробнее в доке: https://docs.djangoproject.com/en/stable/ref/settings/#csrf-trusted-origins
+- `DJANGO_SECRET_KEY` — обязателен, если режим отладки выключен
+- `DJANGO_DEBUG` — `1` для локальной разработки, по умолчанию выключен
+- `DJANGO_ALLOWED_HOSTS=127.0.0.1,localhost`
+- `CSRF_TRUSTED_ORIGINS=https://your-domain.tld` — схема обязательна.
+  Подробнее в доке: https://docs.djangoproject.com/en/stable/ref/settings/#csrf-trusted-origins
+- `DJANGO_CLIENT_IP_HEADER=HTTP_X_REAL_IP` — обязателен за обратным прокси. Укажите заголовок, который прокси выставляет сам, иначе все посетители будут считаться одним голосующим
 
 ## Локальная разработка
+
+Включите режим отладки:
+
+- Windows (PowerShell): `$env:DJANGO_DEBUG="1"`
+- macOS/Linux: `export DJANGO_DEBUG=1`
 
 python manage.py migrate
 python manage.py createsuperuser
@@ -43,10 +48,17 @@ python manage.py runserver
 
 ## Деплой (в т.ч. PythonAnywhere)
 
-1) В `settings.py` пропишите:
+1) Задайте переменные окружения:
 
-```python
-ALLOWED_HOSTS = ["your-domain.tld"]
-CSRF_TRUSTED_ORIGINS = ["https://your-domain.tld"]
-STATIC_ROOT = BASE_DIR / "staticfiles"
+```bash
+DJANGO_SECRET_KEY=<новый случайный ключ>
+DJANGO_ALLOWED_HOSTS=your-domain.tld
+CSRF_TRUSTED_ORIGINS=https://your-domain.tld
+DJANGO_CLIENT_IP_HEADER=HTTP_X_REAL_IP
+```
 
+Сгенерировать ключ:
+
+```bash
+python -c "from django.core.management.utils import get_random_secret_key as k; print(k())"
+```

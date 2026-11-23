@@ -1,14 +1,28 @@
 from pathlib import Path
 import os
-from pathlib import Path
+
+from django.core.exceptions import ImproperlyConfigured
+
 BASE_DIR = Path(__file__).resolve().parent.parent
+
 
 def env(name, default=None):
     return os.getenv(name, default)
 
-SECRET_KEY = env("DJANGO_SECRET_KEY", "8qi#)&vd5%)4zqj7v4(c_sxzcc_07l+eitxh_4ql^-qd+-9c_)")
-DEBUG = env("DJANGO_DEBUG", "1") == "1"
-ALLOWED_HOSTS = env("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
+
+def env_list(name, default=""):
+    return [item.strip() for item in env(name, default).split(",") if item.strip()]
+
+
+DEBUG = env("DJANGO_DEBUG", "0").strip().lower() in ("1", "true", "yes", "on")
+
+SECRET_KEY = env("DJANGO_SECRET_KEY")
+if not SECRET_KEY:
+    if not DEBUG:
+        raise ImproperlyConfigured("Задайте переменную окружения DJANGO_SECRET_KEY")
+    SECRET_KEY = "django-insecure-local-development-only"
+
+ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost")
 
 LANGUAGE_CODE = "ru-ru"
 TIME_ZONE = "Europe/Moscow"
@@ -17,13 +31,12 @@ STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles" 
 STATICFILES_DIRS = [BASE_DIR / "static"] if (BASE_DIR / "static").exists() else []
 
-CSRF_TRUSTED_ORIGINS = [f"http://{h}" for h in ALLOWED_HOSTS if h not in ("127.0.0.1","localhost")] + \
-                       [f"https://{h}" for h in ALLOWED_HOSTS if h not in ("127.0.0.1","localhost")]
+CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS") or [
+    f"https://{h}" for h in ALLOWED_HOSTS if h not in ("127.0.0.1", "localhost")
+]
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-SECRET_KEY = 'change-me'
-DEBUG = True
-ALLOWED_HOSTS = []
+# Заголовок с IP клиента, который выставляет ваш обратный прокси, например HTTP_X_REAL_IP.
+CLIENT_IP_HEADER = env("DJANGO_CLIENT_IP_HEADER", "")
 
 INSTALLED_APPS = [
     'django.contrib.admin',
