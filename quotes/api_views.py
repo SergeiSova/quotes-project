@@ -1,6 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from django.core.exceptions import ValidationError
 from django.db.models import F
 from .models import Quote, Source
 from .serializers import QuoteSerializer
@@ -30,20 +31,24 @@ class VoteQuote(APIView):
 
 class AddQuote(APIView):
     def post(self, request):
-        form = AddQuoteForm(request.data)
+        form = AddQuoteForm(request.data, can_set_weight=request.user.is_staff)
         if form.is_valid():
             try:
                 q = form.save()
                 return Response(QuoteSerializer(q).data, status=201)
-            except Exception as e:
-                return Response({'detail': str(e)}, status=400)
+            except ValidationError as e:
+                return Response({'errors': e.messages}, status=400)
         return Response({'errors': form.errors}, status=400)
 
 
 class TopQuotes(APIView):
     def get(self, request):
         sort = request.query_params.get('sort', 'likes') 
-        limit = int(request.query_params.get('limit', 10))
+        try:
+            limit = int(request.query_params.get('limit', 10))
+        except ValueError:
+            return Response({'detail': 'limit должен быть числом'}, status=400)
+        limit = max(1, min(limit, 100))
         qs = Quote.objects.all().select_related('source')
         if sort == 'views':
             qs = qs.order_by('-views', '-likes')[:limit]

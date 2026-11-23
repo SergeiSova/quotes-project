@@ -2,6 +2,7 @@ from django.http import JsonResponse, Http404
 from django.shortcuts import render, redirect
 from django.views.decorators.http import require_POST
 from django.contrib import messages
+from django.core.exceptions import ValidationError
 from django.db import models
 from .models import Quote, AppStat
 from .forms import AddQuoteForm
@@ -24,16 +25,16 @@ def home(request):
 
 def add_quote(request):
     if request.method == 'POST':
-        form = AddQuoteForm(request.POST)
+        form = AddQuoteForm(request.POST, can_set_weight=request.user.is_staff)
         if form.is_valid():
             try:
                 form.save()
                 messages.success(request, 'Цитата добавлена!')
                 return redirect('quotes:home')
-            except Exception as e:
-                form.add_error(None, str(e))
+            except ValidationError as e:
+                form.add_error(None, e)
     else:
-        form = AddQuoteForm()
+        form = AddQuoteForm(can_set_weight=request.user.is_staff)
     return render(request, 'quotes/add_quote.html', {'form': form})
 
 

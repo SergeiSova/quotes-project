@@ -9,7 +9,7 @@
         <label>Текст цитаты<br>{{ form.text }}</label>
         <label>Источник<br>{{ form.source_name }}</label>
         <label>Тип источника<br>{{ form.source_type }}</label>
-        <label>Вес<br>{{ form.weight }}</label>
+        {% if form.weight %}<label>Вес<br>{{ form.weight }}</label>{% endif %}
       </div>
       <div style="margin-top:12px" class="row">
         <button class="btn" type="submit">Сохранить</button>
