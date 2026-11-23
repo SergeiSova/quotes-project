@@ -1,18 +1,25 @@
 import hashlib
+import hmac
 from math import sqrt
+
+from django.conf import settings
+
+
+def get_client_ip(request) -> str:
+    """IP клиента: из заголовка доверенного прокси, если он настроен, иначе REMOTE_ADDR."""
+    header = getattr(settings, 'CLIENT_IP_HEADER', '')
+    if header and request.META.get(header):
+        return request.META[header].split(',')[-1].strip()[:45]
+    return (request.META.get('REMOTE_ADDR') or '')[:45]
 
 
 def make_fingerprint(request) -> str:
-    """Собираем стабильный отпечаток для антидублей голосов.
-    Приватности ради — хешируем.
+    """Отпечаток для антидублей голосов: один голос за цитату с одного IP.
+    Cookie и User-Agent не учитываются, потому что клиент может менять их при каждом запросе.
+    Приватности ради IP хранится только в виде HMAC.
     """
-    if not request.session.session_key:
-        request.session.save()
-    sess = request.session.session_key or ''
-    ip = (request.META.get('REMOTE_ADDR') or '')[:45]
-    ua = (request.META.get('HTTP_USER_AGENT') or '')[:120]
-    raw = f'{sess}|{ip}|{ua}'.encode('utf-8', 'ignore')
-    return hashlib.sha256(raw).hexdigest()
+    ip = get_client_ip(request).encode('utf-8', 'ignore')
+    return hmac.new(settings.SECRET_KEY.encode('utf-8'), ip, hashlib.sha256).hexdigest()
 
 
 def wilson_lower_bound(up: int, down: int, confidence: float = 0.95) -> float:
